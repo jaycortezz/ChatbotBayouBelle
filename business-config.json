@@ -1,0 +1,120 @@
+{
+  "business": {
+    "name": "Bayou Belle's",
+    "tagline": "Cajun Seafood Kitchen",
+    "phone": "(503) 555-0142",
+    "email": "hello@bayoubelles.com",
+    "address": {
+      "street": "3524 SE Division St",
+      "city": "Portland",
+      "state": "OR",
+      "zip": "97202",
+      "directionsNote": "On SE Division between 35th and 36th, with the teal awning. Two blocks west of the 4 bus stop at 37th."
+    }
+  },
+  "branding": {
+    "accentColor": "#C2451E",
+    "bubbleLabel": "Chat with us",
+    "greeting": "Hey there, cher! Welcome to Bayou Belle's. I can help with our menu, hours, catering, big parties, parking — whatever you need. What can I do for ya?",
+    "botName": "Belle"
+  },
+  "hours": {
+    "Monday": "Closed",
+    "Tuesday": "11:30 AM – 9:00 PM",
+    "Wednesday": "11:30 AM – 9:00 PM",
+    "Thursday": "11:30 AM – 9:00 PM",
+    "Friday": "11:30 AM – 10:00 PM",
+    "Saturday": "11:30 AM – 10:00 PM",
+    "Sunday": "10:00 AM – 8:00 PM (brunch until 2:00 PM)",
+    "notes": "Kitchen closes 30 minutes before closing. Happy hour Tuesday–Friday 3:00–5:30 PM. Live zydeco music Friday nights from 7:00 PM."
+  },
+  "menu": {
+    "sections": [
+      {
+        "name": "Starters",
+        "items": [
+          { "name": "Boudin Balls", "price": "$12", "description": "Crispy fried boudin sausage with creole mustard aioli" },
+          { "name": "Fried Green Tomatoes", "price": "$11", "description": "Cornmeal-crusted, with remoulade", "dietary": ["vegetarian"] },
+          { "name": "Gator Bites", "price": "$14", "description": "Blackened alligator with spicy comeback sauce" },
+          { "name": "Gumbo (cup / bowl)", "price": "$8 / $14", "description": "Chicken and andouille gumbo with dark roux over rice. Contains gluten." }
+        ]
+      },
+      {
+        "name": "Po'Boys (served with cajun fries)",
+        "items": [
+          { "name": "Fried Shrimp Po'Boy", "price": "$17", "description": "Dressed with lettuce, tomato, pickles, remoulade" },
+          { "name": "Fried Oyster Po'Boy", "price": "$19", "description": "Gulf oysters, dressed" },
+          { "name": "Catfish Po'Boy", "price": "$16", "description": "Cornmeal-fried catfish, tartar sauce" },
+          { "name": "Debris Po'Boy", "price": "$18", "description": "Slow-braised beef in gravy, swiss cheese" }
+        ]
+      },
+      {
+        "name": "Mains",
+        "items": [
+          { "name": "Crawfish Étouffée", "price": "$24", "description": "Louisiana crawfish tails in blonde roux over rice" },
+          { "name": "Jambalaya", "price": "$22", "description": "Chicken, andouille, and shrimp. Naturally gluten-free.", "dietary": ["gluten-free"] },
+          { "name": "Blackened Redfish", "price": "$28", "description": "With dirty rice and grilled asparagus", "dietary": ["gluten-free"] },
+          { "name": "Shrimp & Grits", "price": "$23", "description": "Stone-ground grits, tasso ham cream sauce", "dietary": ["gluten-free"] },
+          { "name": "Red Beans & Rice", "price": "$17", "description": "Monday tradition, every day. Vegan by default; add andouille +$4.", "dietary": ["vegan", "gluten-free"] }
+        ]
+      },
+      {
+        "name": "Boils (market availability)",
+        "items": [
+          { "name": "Crawfish Boil", "price": "$16/lb", "description": "Seasonal (roughly Feb–June). Corn, potatoes, garlic butter." },
+          { "name": "Snow Crab Boil", "price": "$34", "description": "One pound of snow crab legs, boil fixings" },
+          { "name": "Shrimp Boil", "price": "$26", "description": "One pound of gulf shrimp, boil fixings" }
+        ]
+      },
+      {
+        "name": "Desserts",
+        "items": [
+          { "name": "Beignets (6)", "price": "$9", "description": "Made to order, powdered sugar, chicory coffee anglaise", "dietary": ["vegetarian"] },
+          { "name": "Bananas Foster", "price": "$11", "description": "Flamed tableside Fridays and Saturdays", "dietary": ["vegetarian", "gluten-free"] },
+          { "name": "Pecan Pie", "price": "$8", "description": "With bourbon whipped cream", "dietary": ["vegetarian"] }
+        ]
+      },
+      {
+        "name": "Drinks",
+        "items": [
+          { "name": "Hurricane", "price": "$12", "description": "The classic — two rums, passion fruit" },
+          { "name": "Sazerac", "price": "$13", "description": "Rye, Peychaud's, absinthe rinse" },
+          { "name": "Abita Beers", "price": "$6–7", "description": "Amber, Purple Haze, Turbodog on rotation" },
+          { "name": "Sweet Tea / Chicory Coffee", "price": "$4", "description": "" }
+        ]
+      }
+    ],
+    "dietaryNotes": "Rice-based dishes (jambalaya, étouffée base, red beans & rice) are gluten-free, but our gumbo roux contains wheat and all fried items share one fryer, so we can't guarantee zero cross-contact for celiac guests. Red Beans & Rice is vegan by default. Most dishes can be made mild on request — our default spice is medium."
+  },
+  "catering": {
+    "summary": "Full-service catering for events of 20 to 250 guests, drop-off or staffed.",
+    "minimumGuests": 20,
+    "pricing": "Drop-off packages from $28/person (po'boy spread) to $45/person (boil buffet with sides and beignets). Staffed events add $150 per server. Custom menus available.",
+    "leadTime": "At least 72 hours notice; one week preferred for events over 75 guests.",
+    "deliveryArea": "Free delivery within 15 miles of the restaurant; beyond that $2/mile.",
+    "deposit": "50% deposit to confirm the date, refundable up to 7 days before the event.",
+    "privateRoom": "Our private back room (The Parlor) seats up to 24 for on-site private events with a $500 food & beverage minimum."
+  },
+  "reservations": {
+    "policy": "Parties of 6 or fewer are walk-in only — the wait is rarely more than 20 minutes except Friday and Saturday evenings. Parties of 7 or more should call ahead at least a day in advance so we can set a table or the private room. We don't take reservations through third-party apps.",
+    "largeParty": "For parties of 10+ we offer a family-style set menu at $35/person that makes big tables much smoother."
+  },
+  "parking": {
+    "details": "Free 12-space lot behind the building (enter from SE 36th). Metered street parking on Division is free after 7 PM and on Sundays. Two EV chargers in the lot, and bike racks out front."
+  },
+  "faqs": [
+    { "q": "Do you have a kids menu?", "a": "Yes — chicken tenders, mac & cheese, or a mini shrimp po'boy, each $8 with a drink." },
+    { "q": "Are dogs allowed?", "a": "Dogs are welcome on the covered patio, and we'll bring water bowls." },
+    { "q": "How spicy is the food?", "a": "Our default is a friendly medium. Almost anything can be made mild, and we keep house-made hot sauces on every table for heat-seekers." },
+    { "q": "Do you sell gift cards?", "a": "Yes, at the register in any amount, or digital gift cards through our website." },
+    { "q": "Is there a wait on weekends?", "a": "Friday and Saturday after 6 PM you should expect 30–45 minutes. Put your name in and grab a Hurricane at the bar." },
+    { "q": "Do you do takeout or delivery?", "a": "Takeout yes — order by phone. Delivery is through the usual apps, though boils travel best picked up hot." },
+    { "q": "When is crawfish season?", "a": "Live Louisiana crawfish typically runs February through June. Follow our socials — we announce each week's boil availability on Thursdays." }
+  ],
+  "bot": {
+    "model": "claude-sonnet-4-6",
+    "maxUserMessageLength": 500,
+    "maxHistoryMessages": 20,
+    "maxResponseTokens": 1024
+  }
+}
