@@ -2,19 +2,21 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
- * HTTP Basic Auth for the admin dashboard. The browser shows a native
- * login prompt; the username is ignored, the password must match
- * ADMIN_PASSWORD.
+ * HTTP Basic Auth for the operator dashboard and the bot-management API.
+ * The browser shows a native login prompt; the username is ignored, the
+ * password must match ADMIN_PASSWORD.
+ *
+ * Public surface (chat, widget config, widget UI, demo pages) is untouched.
  */
 export const config = {
-  matcher: ["/admin", "/admin/:path*"],
+  matcher: ["/dashboard/:path*", "/api/bots/:path*"],
 };
 
 export function middleware(req: NextRequest) {
   const password = process.env.ADMIN_PASSWORD;
   if (!password) {
     return new NextResponse(
-      "Admin dashboard is disabled: set the ADMIN_PASSWORD environment variable.",
+      "Dashboard is disabled: set the ADMIN_PASSWORD environment variable.",
       { status: 503 }
     );
   }
@@ -34,6 +36,6 @@ export function middleware(req: NextRequest) {
 
   return new NextResponse("Authentication required.", {
     status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Admin"' },
+    headers: { "WWW-Authenticate": 'Basic realm="Dashboard"' },
   });
 }

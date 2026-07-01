@@ -1,14 +1,14 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import type { BusinessConfig } from "./config";
+import type { BotConfig } from "./config";
 
 /**
- * Builds the entire system prompt from business-config.json.
- * Swapping in a new client is a config edit — no code changes here.
+ * Builds the entire system prompt from a bot's config (created and edited
+ * in the dashboard; new bots start from business-config.json).
  *
- * The output is deterministic for a given config file, so the API's
- * prompt cache stays warm across requests.
+ * The output is deterministic for a given config, so the API's prompt
+ * cache stays warm across requests to the same bot.
  */
-export function buildSystemPrompt(cfg: BusinessConfig): string {
+export function buildSystemPrompt(cfg: BotConfig): string {
   const b = cfg.business;
   const address = `${b.address.street}, ${b.address.city}, ${b.address.state} ${b.address.zip}`;
 
@@ -88,7 +88,7 @@ When a visitor asks about catering, private events, or a party of 7 or more, you
 }
 
 /** Tool definition for saving catering / large-party leads. */
-export function buildLeadTool(cfg: BusinessConfig): Anthropic.Tool {
+export function buildLeadTool(cfg: BotConfig): Anthropic.Tool {
   return {
     name: "capture_lead",
     description: `Save a catering or large-party inquiry for the ${cfg.business.name} team to follow up on. Call this exactly once, only after the visitor has provided their name, phone number, party size, and event date. Never call it with placeholder or guessed values.`,

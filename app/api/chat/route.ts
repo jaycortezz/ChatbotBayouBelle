@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { getConfig, getModel } from "@/lib/config";
+import { getModel } from "@/lib/config";
 import { buildSystemPrompt, buildLeadTool } from "@/lib/prompt";
-import { saveLead, logConversationTurns } from "@/lib/store";
+import { getBot, saveLead, logConversationTurns } from "@/lib/store";
 import { notifyLead } from "@/lib/notify";
 
 export const runtime = "nodejs";
@@ -13,6 +13,7 @@ const client = new Anthropic();
 const MAX_TOOL_ITERATIONS = 3;
 
 interface ChatRequestBody {
+  botId: string;
   sessionId: string;
   messages: { role: "user" | "assistant"; content: string }[];
 }
@@ -21,6 +22,9 @@ function isValidBody(body: unknown): body is ChatRequestBody {
   if (!body || typeof body !== "object") return false;
   const b = body as Record<string, unknown>;
   return (
+    typeof b.botId === "string" &&
+    b.botId.length > 0 &&
+    b.botId.length <= 100 &&
     typeof b.sessionId === "string" &&
     b.sessionId.length > 0 &&
     b.sessionId.length <= 100 &&
@@ -38,13 +42,18 @@ function isValidBody(body: unknown): body is ChatRequestBody {
 }
 
 export async function POST(req: Request) {
-  const cfg = getConfig();
-  const fallbackReply = `Sorry, I'm having a little trouble right now. Please give us a call at ${cfg.business.phone} and a real human will help you out!`;
-
   const body = (await req.json().catch(() => null)) as unknown;
   if (!isValidBody(body)) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
+
+  const bot = await getBot(body.botId).catch(() => null);
+  if (!bot) {
+    return NextResponse.json({ error: "Unknown bot" }, { status: 404 });
+  }
+
+  const cfg = bot.config;
+  const fallbackReply = `Sorry, I'm having a little trouble right now. Please give us a call at ${cfg.business.phone} and a real human will help you out!`;
 
   const lastMessage = body.messages[body.messages.length - 1];
   if (lastMessage.role !== "user") {
@@ -77,7 +86,7 @@ export async function POST(req: Request) {
     {
       type: "text",
       text: buildSystemPrompt(cfg),
-      // The prompt is deterministic per config file, so it caches well.
+      // The prompt is deterministic per bot config, so it caches well.
       cache_control: { type: "ephemeral" },
     },
   ];
@@ -87,7 +96,7 @@ export async function POST(req: Request) {
 
   try {
     let response = await client.messages.create({
-      model: getModel(),
+      model: getModel(cfg),
       max_tokens: cfg.bot.maxResponseTokens,
       system,
       tools,
@@ -113,7 +122,7 @@ export async function POST(req: Request) {
             notes?: string;
           };
           try {
-            const lead = await saveLead({
+            const lead = await saveLead(bot.id, {
               name: String(input.name ?? "").slice(0, 200),
               phone: String(input.phone ?? "").slice(0, 50),
               partySize: Number(input.party_size) || 0,
@@ -124,14 +133,14 @@ export async function POST(req: Request) {
               notes: input.notes ? String(input.notes).slice(0, 1000) : undefined,
               sessionId: body.sessionId,
             });
-            await notifyLead(lead);
+            await notifyLead(bot, lead);
             toolResults.push({
               type: "tool_result",
               tool_use_id: block.id,
               content: "Lead saved. The team has been notified and will follow up.",
             });
           } catch (err) {
-            console.error("[chat] failed to save lead:", err);
+            console.error(`[chat] failed to save lead (bot ${bot.id}):`, err);
             toolResults.push({
               type: "tool_result",
               tool_use_id: block.id,
@@ -156,7 +165,7 @@ export async function POST(req: Request) {
       ];
 
       response = await client.messages.create({
-        model: getModel(),
+        model: getModel(cfg),
         max_tokens: cfg.bot.maxResponseTokens,
         system,
         tools,
@@ -172,9 +181,9 @@ export async function POST(req: Request) {
         .map((b) => b.text)
         .join("\n\n") || fallbackReply;
 
-    // Log the exchange for the admin dashboard; never block the reply on it.
+    // Log the exchange for the dashboard; never block the reply on it.
     const now = new Date().toISOString();
-    logConversationTurns(body.sessionId, [
+    logConversationTurns(bot.id, body.sessionId, [
       { role: "user", content: lastMessage.content, at: now },
       { role: "assistant", content: reply, at: now },
     ]).catch((err) => console.error("[chat] failed to log conversation:", err));

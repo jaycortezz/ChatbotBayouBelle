@@ -1,14 +1,18 @@
-import rawConfig from "@/business-config.json";
+import template from "@/business-config.json";
 
-export type BusinessConfig = typeof rawConfig;
+/**
+ * business-config.json is now the TEMPLATE for new bots: every bot created
+ * in the dashboard starts as a copy of it (with name/color overrides) and is
+ * then edited live in the dashboard. Bots themselves live in the store.
+ */
+export type BotConfig = typeof template;
 
-export function getConfig(): BusinessConfig {
-  return rawConfig;
+export function getTemplateConfig(): BotConfig {
+  return JSON.parse(JSON.stringify(template)) as BotConfig;
 }
 
-/** The subset of config that is safe to send to the browser. */
-export function getPublicConfig() {
-  const cfg = getConfig();
+/** The subset of a bot's config that is safe to send to the browser. */
+export function getPublicConfig(cfg: BotConfig) {
   return {
     name: cfg.business.name,
     tagline: cfg.business.tagline,
@@ -21,6 +25,6 @@ export function getPublicConfig() {
   };
 }
 
-export function getModel(): string {
-  return process.env.ANTHROPIC_MODEL || getConfig().bot.model;
+export function getModel(cfg: BotConfig): string {
+  return process.env.ANTHROPIC_MODEL || cfg.bot.model;
 }

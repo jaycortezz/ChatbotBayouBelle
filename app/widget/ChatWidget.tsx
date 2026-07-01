@@ -10,9 +10,9 @@ interface Message {
   content: string;
 }
 
-function getSessionId(): string {
+function getSessionId(botId: string): string {
   try {
-    const key = "chatbot-session-id";
+    const key = `chatbot-session-id:${botId}`;
     let id = window.sessionStorage.getItem(key);
     if (!id) {
       id = `s_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
@@ -24,7 +24,13 @@ function getSessionId(): string {
   }
 }
 
-export default function ChatWidget({ config }: { config: PublicConfig }) {
+export default function ChatWidget({
+  config,
+  botId,
+}: {
+  config: PublicConfig;
+  botId: string;
+}) {
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: config.greeting },
   ]);
@@ -35,9 +41,9 @@ export default function ChatWidget({ config }: { config: PublicConfig }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    sessionIdRef.current = getSessionId();
+    sessionIdRef.current = getSessionId(botId);
     inputRef.current?.focus();
-  }, []);
+  }, [botId]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -58,6 +64,7 @@ export default function ChatWidget({ config }: { config: PublicConfig }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          botId,
           sessionId: sessionIdRef.current,
           // The greeting is client-side flavor, not part of the model history.
           messages: nextMessages.slice(1),

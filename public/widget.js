@@ -2,12 +2,12 @@
  * Embeddable chat widget loader.
  *
  * Usage on any website (one line):
- *   <script src="https://YOUR-DEPLOYMENT.vercel.app/widget.js" async></script>
+ *   <script src="https://YOUR-PLATFORM.vercel.app/widget.js" data-bot="BOT_ID" async></script>
  *
- * It renders a floating chat bubble in the bottom-right corner. Clicking it
- * opens the chat UI in an iframe served from the same deployment, so the
- * Anthropic API key and all logic stay server-side. Branding (name, accent
- * color, labels) comes from business-config.json via /api/widget-config.
+ * The data-bot attribute selects which bot to load (get the exact snippet
+ * from the dashboard). It renders a floating chat bubble in the bottom-right
+ * corner; clicking it opens the chat UI in an iframe served from the
+ * platform, so the Anthropic API key and all logic stay server-side.
  */
 (function () {
   "use strict";
@@ -15,25 +15,35 @@
   if (window.__chatWidgetLoaded) return;
   window.__chatWidgetLoaded = true;
 
-  // Figure out where this script was loaded from, so the iframe and config
-  // requests hit the right deployment even when embedded on another site.
-  function getOrigin() {
-    var src = null;
+  // Locate our own script tag to read the platform origin and the bot id,
+  // so this works when embedded on any third-party site.
+  function getScriptTag() {
     if (document.currentScript && document.currentScript.src) {
-      src = document.currentScript.src;
-    } else {
-      var scripts = document.querySelectorAll('script[src*="widget.js"]');
-      if (scripts.length) src = scripts[scripts.length - 1].src;
+      return document.currentScript;
     }
-    try {
-      return new URL(src, window.location.href).origin;
-    } catch (e) {
-      return window.location.origin;
-    }
+    var scripts = document.querySelectorAll('script[src*="widget.js"]');
+    return scripts.length ? scripts[scripts.length - 1] : null;
   }
 
-  var ORIGIN = getOrigin();
-  var Z = 2147483000; // near-max z-index, below some cookie banners' max
+  var tag = getScriptTag();
+  var BOT_ID = tag ? tag.getAttribute("data-bot") : null;
+  var ORIGIN;
+  try {
+    ORIGIN = new URL(tag && tag.src, window.location.href).origin;
+  } catch (e) {
+    ORIGIN = window.location.origin;
+  }
+
+  if (!BOT_ID) {
+    console.error(
+      '[chat-widget] Missing data-bot attribute. Embed like: <script src="' +
+        ORIGIN +
+        '/widget.js" data-bot="YOUR_BOT_ID" async><\/script>'
+    );
+    return;
+  }
+
+  var Z = 2147483000; // near-max z-index
 
   var defaults = {
     name: "Chat",
@@ -41,10 +51,16 @@
     bubbleLabel: "Chat with us",
   };
 
-  fetch(ORIGIN + "/api/widget-config")
-    .then(function (r) { return r.json(); })
+  fetch(ORIGIN + "/api/widget-config?bot=" + encodeURIComponent(BOT_ID))
+    .then(function (r) {
+      if (!r.ok) throw new Error("widget-config " + r.status);
+      return r.json();
+    })
     .then(function (cfg) { init(cfg || defaults); })
-    .catch(function () { init(defaults); });
+    .catch(function (err) {
+      console.error("[chat-widget] could not load config:", err);
+      init(defaults);
+    });
 
   function init(cfg) {
     var accent = cfg.accentColor || defaults.accentColor;
@@ -107,7 +123,7 @@
     function setOpen(next) {
       open = next;
       if (open && !iframeLoaded) {
-        frame.src = ORIGIN + "/widget";
+        frame.src = ORIGIN + "/widget?bot=" + encodeURIComponent(BOT_ID);
         iframeLoaded = true;
       }
       layout();

@@ -1,33 +1,34 @@
-import type { Lead } from "./store";
-import { getConfig } from "./config";
+import type { Bot, Lead } from "./store";
 
 /**
- * Sends lead notifications. Two channels, both optional, both fire if set:
+ * Sends lead notifications for a bot. Two channels, both optional, both fire:
  *
- * - Resend email (RESEND_API_KEY + LEAD_EMAIL_TO): uses Resend's REST API
- *   directly — no SDK dependency. Free tier is plenty for lead volume.
- * - Generic webhook (LEAD_WEBHOOK_URL): POSTs the lead as JSON. Point it at
- *   Zapier, Make, a Slack incoming webhook, or your own endpoint.
+ * - Resend email: RESEND_API_KEY is platform-wide (one Resend account for the
+ *   whole platform); the destination address is per-bot (dashboard setting),
+ *   falling back to the LEAD_EMAIL_TO env var.
+ * - Webhook: per-bot URL (dashboard setting), falling back to LEAD_WEBHOOK_URL.
  *
  * Failures are logged but never break the chat — the lead is already saved
  * to the store before this runs.
  */
-export async function notifyLead(lead: Lead): Promise<void> {
-  await Promise.allSettled([sendEmail(lead), sendWebhook(lead)]).then((results) => {
-    for (const r of results) {
-      if (r.status === "rejected") {
-        console.error("[notify] lead notification failed:", r.reason);
+export async function notifyLead(bot: Bot, lead: Lead): Promise<void> {
+  await Promise.allSettled([sendEmail(bot, lead), sendWebhook(bot, lead)]).then(
+    (results) => {
+      for (const r of results) {
+        if (r.status === "rejected") {
+          console.error(`[notify] lead notification failed (bot ${bot.id}):`, r.reason);
+        }
       }
     }
-  });
+  );
 }
 
-async function sendEmail(lead: Lead): Promise<void> {
+async function sendEmail(bot: Bot, lead: Lead): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.LEAD_EMAIL_TO;
+  const to = bot.notifications.emailTo || process.env.LEAD_EMAIL_TO;
   if (!apiKey || !to) return;
 
-  const businessName = getConfig().business.name;
+  const businessName = bot.config.business.name;
   const from = process.env.LEAD_EMAIL_FROM || "Leads <onboarding@resend.dev>";
 
   const html = `
@@ -60,14 +61,19 @@ async function sendEmail(lead: Lead): Promise<void> {
   }
 }
 
-async function sendWebhook(lead: Lead): Promise<void> {
-  const url = process.env.LEAD_WEBHOOK_URL;
+async function sendWebhook(bot: Bot, lead: Lead): Promise<void> {
+  const url = bot.notifications.webhookUrl || process.env.LEAD_WEBHOOK_URL;
   if (!url) return;
 
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ type: "chatbot.lead", lead }),
+    body: JSON.stringify({
+      type: "chatbot.lead",
+      botId: bot.id,
+      business: bot.config.business.name,
+      lead,
+    }),
   });
   if (!res.ok) {
     throw new Error(`Webhook responded ${res.status}`);

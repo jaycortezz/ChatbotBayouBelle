@@ -1,62 +1,54 @@
-import { getConfig } from "@/lib/config";
-import { listLeads, listConversations, storageBackendName } from "@/lib/store";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getBot, listLeads, listConversations } from "@/lib/store";
 
-// Protected by HTTP Basic Auth in middleware.ts (ADMIN_PASSWORD).
 export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
-  const cfg = getConfig();
-  const accent = cfg.branding.accentColor;
+export default async function BotLeadsPage({ params }: { params: { botId: string } }) {
+  const bot = await getBot(params.botId).catch(() => null);
+  if (!bot) notFound();
+
+  const accent = bot.config.branding.accentColor;
   const [leads, conversations] = await Promise.all([
-    listLeads().catch(() => []),
-    listConversations().catch(() => []),
+    listLeads(bot.id).catch(() => []),
+    listConversations(bot.id).catch(() => []),
   ]);
 
   return (
-    <main
-      style={{
-        maxWidth: 960,
-        margin: "0 auto",
-        padding: "40px 24px 80px",
-        background: "#fff",
-      }}
-    >
-      <h1 style={{ fontFamily: "Georgia, serif", fontSize: 32, marginBottom: 4 }}>
-        {cfg.business.name} — Admin
+    <main style={{ maxWidth: 960, margin: "0 auto", padding: "40px 24px 80px" }}>
+      <Link href={`/dashboard/${bot.id}`} style={{ fontSize: 13.5, color: "#8a7a68" }}>
+        ← Back to {bot.config.business.name}
+      </Link>
+      <h1 style={{ fontFamily: "Georgia, serif", fontSize: 30, margin: "16px 0 32px" }}>
+        {bot.config.business.name} — Leads &amp; conversations
       </h1>
-      <p style={{ color: "#8a7a68", fontSize: 13, marginBottom: 32 }}>
-        Storage backend: {storageBackendName()}
-      </p>
 
       <h2 style={{ fontSize: 20, marginBottom: 12, color: accent }}>
         Leads ({leads.length})
       </h2>
       {leads.length === 0 ? (
         <p style={{ color: "#8a7a68", marginBottom: 40 }}>
-          No leads captured yet. Ask the bot about catering to create one.
+          No leads captured yet. Ask the bot about catering on the demo page to
+          create one.
         </p>
       ) : (
         <div style={{ overflowX: "auto", marginBottom: 40 }}>
-          <table
-            style={{ borderCollapse: "collapse", width: "100%", fontSize: 14 }}
-          >
+          <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 14 }}>
             <thead>
               <tr>
-                {["When", "Name", "Phone", "Party", "Date", "Type", "Notes"].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      style={{
-                        textAlign: "left",
-                        padding: "8px 10px",
-                        borderBottom: `2px solid ${accent}`,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {h}
-                    </th>
-                  )
-                )}
+                {["When", "Name", "Phone", "Party", "Date", "Type", "Notes"].map((h) => (
+                  <th
+                    key={h}
+                    style={{
+                      textAlign: "left",
+                      padding: "8px 10px",
+                      borderBottom: `2px solid ${accent}`,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -102,10 +94,8 @@ export default async function AdminPage() {
             <div style={{ marginTop: 12 }}>
               {convo.turns.map((turn, i) => (
                 <p key={i} style={{ fontSize: 13.5, lineHeight: 1.6, margin: "6px 0" }}>
-                  <strong
-                    style={{ color: turn.role === "user" ? "#2d2118" : accent }}
-                  >
-                    {turn.role === "user" ? "Visitor" : cfg.branding.botName}:
+                  <strong style={{ color: turn.role === "user" ? "#2d2118" : accent }}>
+                    {turn.role === "user" ? "Visitor" : bot.config.branding.botName}:
                   </strong>{" "}
                   {turn.content}
                 </p>
