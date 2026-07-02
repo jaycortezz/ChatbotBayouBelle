@@ -5,9 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const bots = await listBots().catch(() => []);
-  const leadCounts = await Promise.all(
-    bots.map((b) => countLeads(b.id).catch(() => 0))
-  );
+  const leadCounts = await Promise.all(bots.map((b) => countLeads(b.id).catch(() => 0)));
 
   return (
     <main style={{ maxWidth: 960, margin: "0 auto", padding: "40px 24px 80px" }}>
@@ -21,11 +19,11 @@ export default async function DashboardPage() {
           gap: 12,
         }}
       >
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: 32 }}>Chatbots</h1>
+        <h1 style={{ fontSize: 32 }}>Cortez Chatbots</h1>
         <Link
           href="/dashboard/new"
           style={{
-            background: "#C2451E",
+            background: "#4F46E5",
             color: "#fff",
             padding: "10px 20px",
             borderRadius: 8,
@@ -37,24 +35,24 @@ export default async function DashboardPage() {
           + New chatbot
         </Link>
       </div>
-      <p style={{ color: "#8a7a68", fontSize: 13, marginBottom: 32 }}>
+      <p style={{ color: "#9a9aa8", fontSize: 13, marginBottom: 32 }}>
         Storage backend: {storageBackendName()}
       </p>
 
       {bots.length === 0 ? (
         <div
           style={{
-            border: "2px dashed #ddd0bb",
+            border: "2px dashed #d9d9e3",
             borderRadius: 12,
             padding: "60px 24px",
             textAlign: "center",
-            color: "#8a7a68",
+            color: "#767685",
           }}
         >
           <p style={{ fontSize: 18, marginBottom: 8 }}>No chatbots yet.</p>
           <p style={{ fontSize: 14 }}>
-            Create your first one — it starts from the Bayou Belle&apos;s demo
-            template so it works immediately.
+            Create your first one — the wizard walks through brand voice, optional website
+            training, and lead capture.
           </p>
         </div>
       ) : (
@@ -63,7 +61,7 @@ export default async function DashboardPage() {
             <div
               key={bot.id}
               style={{
-                border: "1px solid #eee3d0",
+                border: "1px solid #ece9f5",
                 borderRadius: 12,
                 padding: "20px 24px",
                 display: "flex",
@@ -83,18 +81,23 @@ export default async function DashboardPage() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontFamily: "Georgia, serif",
                   fontSize: 20,
                   flexShrink: 0,
                 }}
               >
-                {bot.config.business.name.charAt(0)}
+                {bot.config.business.name.charAt(0) || "?"}
               </div>
               <div style={{ flex: 1, minWidth: 200 }}>
                 <div style={{ fontSize: 17, fontWeight: 600 }}>
-                  {bot.config.business.name}
+                  {bot.config.business.name || "Untitled bot"}
+                  {bot.config.business.industry && (
+                    <span style={{ fontWeight: 400, color: "#9a9aa8", fontSize: 13 }}>
+                      {" "}
+                      · {bot.config.business.industry}
+                    </span>
+                  )}
                 </div>
-                <div style={{ fontSize: 12.5, color: "#8a7a68" }}>
+                <div style={{ fontSize: 12.5, color: "#9a9aa8" }}>
                   {bot.id} · updated {bot.updatedAt.slice(0, 16).replace("T", " ")} ·{" "}
                   {leadCounts[i]} lead{leadCounts[i] === 1 ? "" : "s"}
                 </div>
@@ -119,10 +122,10 @@ export default async function DashboardPage() {
 }
 
 const btn: React.CSSProperties = {
-  border: "1px solid #ddd0bb",
+  border: "1px solid #d9d9e3",
   borderRadius: 8,
   padding: "8px 16px",
   fontSize: 13.5,
   textDecoration: "none",
-  color: "#2d2118",
+  color: "#1c1c24",
 };

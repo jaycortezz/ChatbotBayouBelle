@@ -3,7 +3,7 @@ export default function Home() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#F7F1E5",
+        background: "#F7F7FB",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -17,31 +17,30 @@ export default function Home() {
           textTransform: "uppercase",
           letterSpacing: "0.3em",
           fontSize: 13,
-          color: "#C2451E",
+          color: "#4F46E5",
           marginBottom: 16,
         }}
       >
-        AI chat widgets for restaurants
+        AI chat widgets for any business
       </p>
       <h1
         style={{
-          fontFamily: "Georgia, 'Times New Roman', serif",
           fontSize: "clamp(36px, 7vw, 64px)",
-          color: "#2d2118",
+          color: "#1c1c24",
           marginBottom: 24,
         }}
       >
-        Chatbot Platform
+        Cortez Chatbots
       </h1>
-      <p style={{ maxWidth: 560, lineHeight: 1.7, color: "#5a4a3a", marginBottom: 32 }}>
-        Create a branded AI chatbot per client, embed it on their website with a
-        single script tag, and collect catering &amp; large-party leads — all
-        managed from one dashboard.
+      <p style={{ maxWidth: 560, lineHeight: 1.7, color: "#4b4b57", marginBottom: 32 }}>
+        Create a branded AI chatbot for any client — train it on their website in one click,
+        tune its brand voice, embed it with a single script tag, and collect leads — all managed
+        from one dashboard.
       </p>
       <a
         href="/dashboard"
         style={{
-          background: "#C2451E",
+          background: "#4F46E5",
           color: "#fff",
           padding: "14px 32px",
           borderRadius: 8,

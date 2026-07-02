@@ -27,16 +27,17 @@ export interface Bot {
   notifications: BotNotifications;
 }
 
+/**
+ * A captured lead. `fields` is keyed by the bot's configured lead-field
+ * keys (leadCapture.fields[].key), so its shape varies per bot/industry —
+ * a cleaning company might have {name, phone, address}, a law firm
+ * {name, email, caseType}. Look up labels via the bot's leadCapture.fields.
+ */
 export interface Lead {
   id: string;
   createdAt: string;
-  name: string;
-  phone: string;
-  partySize: number;
-  eventDate: string;
-  eventType?: string;
-  notes?: string;
   sessionId: string;
+  fields: Record<string, string>;
 }
 
 export interface ConversationTurn {

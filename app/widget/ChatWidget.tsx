@@ -77,7 +77,9 @@ export default function ChatWidget({
           role: "assistant",
           content:
             data.reply ||
-            `Sorry, something went wrong. Please call us at ${config.phone}.`,
+            (config.phone
+              ? `Sorry, something went wrong. Please call us at ${config.phone}.`
+              : "Sorry, something went wrong. Please try again shortly."),
         },
       ]);
     } catch {
@@ -85,7 +87,9 @@ export default function ChatWidget({
         ...prev,
         {
           role: "assistant",
-          content: `Sorry, I couldn't connect just now. Please call us at ${config.phone}.`,
+          content: config.phone
+            ? `Sorry, I couldn't connect just now. Please call us at ${config.phone}.`
+            : "Sorry, I couldn't connect just now. Please try again shortly.",
         },
       ]);
     } finally {
@@ -107,7 +111,9 @@ export default function ChatWidget({
         display: "flex",
         flexDirection: "column",
         height: "100dvh",
-        background: "#FBF6EC",
+        background: "#F7F7FB",
+        fontFamily:
+          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
       }}
     >
       {/* Header */}
@@ -132,16 +138,14 @@ export default function ChatWidget({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontFamily: "Georgia, serif",
-            fontSize: 19,
+            fontSize: 17,
+            fontWeight: 600,
           }}
         >
           {config.botName.charAt(0)}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: "Georgia, serif", fontSize: 17 }}>
-            {config.name}
-          </div>
+          <div style={{ fontSize: 16, fontWeight: 600 }}>{config.name}</div>
           <div style={{ fontSize: 12, opacity: 0.9 }}>
             {config.botName} · usually replies in seconds
           </div>
@@ -184,8 +188,8 @@ export default function ChatWidget({
                 borderRadius:
                   m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
                 background: m.role === "user" ? accent : "#fff",
-                color: m.role === "user" ? "#fff" : "#2d2118",
-                boxShadow: "0 1px 2px rgba(45,33,24,0.08)",
+                color: m.role === "user" ? "#fff" : "#1c1c24",
+                boxShadow: "0 1px 2px rgba(28,28,36,0.08)",
                 fontSize: 14.5,
                 lineHeight: 1.55,
                 whiteSpace: "pre-wrap",
@@ -203,9 +207,9 @@ export default function ChatWidget({
                 padding: "12px 16px",
                 borderRadius: "16px 16px 16px 4px",
                 background: "#fff",
-                boxShadow: "0 1px 2px rgba(45,33,24,0.08)",
+                boxShadow: "0 1px 2px rgba(28,28,36,0.08)",
                 fontSize: 14,
-                color: "#8a7a68",
+                color: "#767685",
               }}
             >
               <span className="typing-dots">
@@ -230,7 +234,7 @@ export default function ChatWidget({
           gap: 8,
           padding: 12,
           background: "#fff",
-          borderTop: "1px solid #eee3d0",
+          borderTop: "1px solid #ece9f5",
           flexShrink: 0,
         }}
       >
@@ -239,16 +243,16 @@ export default function ChatWidget({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           maxLength={config.maxUserMessageLength}
-          placeholder="Ask about menu, hours, catering..."
+          placeholder="Type a message..."
           aria-label="Your message"
           style={{
             flex: 1,
-            border: "1px solid #ddd0bb",
+            border: "1px solid #d9d9e3",
             borderRadius: 22,
             padding: "10px 16px",
             fontSize: 14.5,
             outline: "none",
-            background: "#FBF6EC",
+            background: "#F7F7FB",
           }}
         />
         <button

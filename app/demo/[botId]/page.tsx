@@ -53,8 +53,8 @@ export default async function DemoPage({ params }: { params: { botId: string } }
       <p style={{ maxWidth: 520, lineHeight: 1.7, color: "#5a4a3a" }}>
         This is the live preview of the chatbot widget — the bubble in the
         bottom-right corner is embedded exactly as it will be on the real
-        website. Try asking about hours, the menu, dietary options, parking,
-        or catering for a large party.
+        website. Ask it about the business — hours, what it offers, pricing —
+        or try triggering a lead capture to see how that flows.
       </p>
 
       <Script src="/widget.js" data-bot={bot.id} strategy="afterInteractive" />

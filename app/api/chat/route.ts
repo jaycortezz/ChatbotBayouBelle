@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getModel } from "@/lib/config";
-import { buildSystemPrompt, buildLeadTool } from "@/lib/prompt";
+import { buildSystemPrompt, buildLeadTool, contactActionPhrase } from "@/lib/prompt";
 import { getBot, saveLead, logConversationTurns } from "@/lib/store";
 import { notifyLead } from "@/lib/notify";
 
@@ -53,7 +53,9 @@ export async function POST(req: Request) {
   }
 
   const cfg = bot.config;
-  const fallbackReply = `Sorry, I'm having a little trouble right now. Please give us a call at ${cfg.business.phone} and a real human will help you out!`;
+  const fallbackReply = `Sorry, I'm having a little trouble right now. Please ${contactActionPhrase(
+    cfg
+  )} and a real human will help you out!`;
 
   const lastMessage = body.messages[body.messages.length - 1];
   if (lastMessage.role !== "user") {
@@ -90,7 +92,8 @@ export async function POST(req: Request) {
       cache_control: { type: "ephemeral" },
     },
   ];
-  const tools = [buildLeadTool(cfg)];
+  const leadTool = buildLeadTool(cfg);
+  const tools = leadTool ? [leadTool] : undefined;
 
   let messages: Anthropic.MessageParam[] = history;
 
@@ -112,27 +115,17 @@ export async function POST(req: Request) {
       for (const block of response.content) {
         if (block.type !== "tool_use") continue;
 
-        if (block.name === "capture_lead") {
-          const input = block.input as {
-            name?: string;
-            phone?: string;
-            party_size?: number;
-            event_date?: string;
-            event_type?: string;
-            notes?: string;
-          };
+        if (block.name === "capture_lead" && leadTool) {
+          const input = block.input as Record<string, unknown>;
+          const fields: Record<string, string> = {};
+          for (const f of cfg.leadCapture.fields) {
+            const v = input[f.key];
+            if (v !== undefined && v !== null && String(v).trim()) {
+              fields[f.key] = String(v).slice(0, 500);
+            }
+          }
           try {
-            const lead = await saveLead(bot.id, {
-              name: String(input.name ?? "").slice(0, 200),
-              phone: String(input.phone ?? "").slice(0, 50),
-              partySize: Number(input.party_size) || 0,
-              eventDate: String(input.event_date ?? "").slice(0, 200),
-              eventType: input.event_type
-                ? String(input.event_type).slice(0, 200)
-                : undefined,
-              notes: input.notes ? String(input.notes).slice(0, 1000) : undefined,
-              sessionId: body.sessionId,
-            });
+            const lead = await saveLead(bot.id, { sessionId: body.sessionId, fields });
             await notifyLead(bot, lead);
             toolResults.push({
               type: "tool_result",
@@ -144,7 +137,9 @@ export async function POST(req: Request) {
             toolResults.push({
               type: "tool_result",
               tool_use_id: block.id,
-              content: `Could not save the lead due to a technical problem. Apologize and ask the visitor to call ${cfg.business.phone} directly.`,
+              content: `Could not save the lead due to a technical problem. Apologize and ask the visitor to ${contactActionPhrase(
+                cfg
+              )}.`,
               is_error: true,
             });
           }

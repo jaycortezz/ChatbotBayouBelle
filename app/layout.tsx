@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Chatbot Platform",
-  description: "Create and manage AI chat widgets for restaurant clients.",
+  title: "Cortez Chatbots",
+  description: "Create and manage AI chat widgets for any client business.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

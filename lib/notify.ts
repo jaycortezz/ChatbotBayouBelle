@@ -23,6 +23,13 @@ export async function notifyLead(bot: Bot, lead: Lead): Promise<void> {
   );
 }
 
+/** key -> human label, from the bot's configured lead fields. */
+function labelMap(bot: Bot): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const f of bot.config.leadCapture.fields) map[f.key] = f.label || f.key;
+  return map;
+}
+
 async function sendEmail(bot: Bot, lead: Lead): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   const to = bot.notifications.emailTo || process.env.LEAD_EMAIL_TO;
@@ -30,18 +37,23 @@ async function sendEmail(bot: Bot, lead: Lead): Promise<void> {
 
   const businessName = bot.config.business.name;
   const from = process.env.LEAD_EMAIL_FROM || "Leads <onboarding@resend.dev>";
+  const labels = labelMap(bot);
+
+  const rows = Object.entries(lead.fields)
+    .map(
+      ([key, value]) =>
+        `<tr><td><b>${escapeHtml(labels[key] || key)}</b></td><td>${escapeHtml(value)}</td></tr>`
+    )
+    .join("");
 
   const html = `
     <h2>New ${escapeHtml(businessName)} lead from the website chatbot</h2>
     <table cellpadding="6" style="border-collapse:collapse">
-      <tr><td><b>Name</b></td><td>${escapeHtml(lead.name)}</td></tr>
-      <tr><td><b>Phone</b></td><td>${escapeHtml(lead.phone)}</td></tr>
-      <tr><td><b>Party size</b></td><td>${lead.partySize}</td></tr>
-      <tr><td><b>Event date</b></td><td>${escapeHtml(lead.eventDate)}</td></tr>
-      <tr><td><b>Type</b></td><td>${escapeHtml(lead.eventType || "—")}</td></tr>
-      <tr><td><b>Notes</b></td><td>${escapeHtml(lead.notes || "—")}</td></tr>
+      ${rows}
       <tr><td><b>Received</b></td><td>${lead.createdAt}</td></tr>
     </table>`;
+
+  const summary = Object.values(lead.fields)[0] || "New lead";
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -52,7 +64,7 @@ async function sendEmail(bot: Bot, lead: Lead): Promise<void> {
     body: JSON.stringify({
       from,
       to: [to],
-      subject: `New lead: ${lead.name} — party of ${lead.partySize} on ${lead.eventDate}`,
+      subject: `New lead: ${summary} — ${businessName}`,
       html,
     }),
   });
@@ -73,6 +85,7 @@ async function sendWebhook(bot: Bot, lead: Lead): Promise<void> {
       botId: bot.id,
       business: bot.config.business.name,
       lead,
+      fieldLabels: labelMap(bot),
     }),
   });
   if (!res.ok) {

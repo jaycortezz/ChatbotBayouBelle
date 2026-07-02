@@ -9,7 +9,7 @@ import type { NextRequest } from "next/server";
  * Public surface (chat, widget config, widget UI, demo pages) is untouched.
  */
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/bots/:path*"],
+  matcher: ["/dashboard/:path*", "/api/bots/:path*", "/api/train/:path*"],
 };
 
 export function middleware(req: NextRequest) {

@@ -9,6 +9,7 @@ export default async function BotLeadsPage({ params }: { params: { botId: string
   if (!bot) notFound();
 
   const accent = bot.config.branding.accentColor;
+  const fieldOrder = bot.config.leadCapture.fields; // defines column order + labels
   const [leads, conversations] = await Promise.all([
     listLeads(bot.id).catch(() => []),
     listConversations(bot.id).catch(() => []),
@@ -16,19 +17,17 @@ export default async function BotLeadsPage({ params }: { params: { botId: string
 
   return (
     <main style={{ maxWidth: 960, margin: "0 auto", padding: "40px 24px 80px" }}>
-      <Link href={`/dashboard/${bot.id}`} style={{ fontSize: 13.5, color: "#8a7a68" }}>
+      <Link href={`/dashboard/${bot.id}`} style={{ fontSize: 13.5, color: "#767685" }}>
         ← Back to {bot.config.business.name}
       </Link>
-      <h1 style={{ fontFamily: "Georgia, serif", fontSize: 30, margin: "16px 0 32px" }}>
+      <h1 style={{ fontSize: 30, margin: "16px 0 32px" }}>
         {bot.config.business.name} — Leads &amp; conversations
       </h1>
 
-      <h2 style={{ fontSize: 20, marginBottom: 12, color: accent }}>
-        Leads ({leads.length})
-      </h2>
+      <h2 style={{ fontSize: 20, marginBottom: 12, color: accent }}>Leads ({leads.length})</h2>
       {leads.length === 0 ? (
-        <p style={{ color: "#8a7a68", marginBottom: 40 }}>
-          No leads captured yet. Ask the bot about catering on the demo page to
+        <p style={{ color: "#767685", marginBottom: 40 }}>
+          No leads captured yet. Trigger the bot&apos;s lead-capture condition on the demo page to
           create one.
         </p>
       ) : (
@@ -36,17 +35,10 @@ export default async function BotLeadsPage({ params }: { params: { botId: string
           <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 14 }}>
             <thead>
               <tr>
-                {["When", "Name", "Phone", "Party", "Date", "Type", "Notes"].map((h) => (
-                  <th
-                    key={h}
-                    style={{
-                      textAlign: "left",
-                      padding: "8px 10px",
-                      borderBottom: `2px solid ${accent}`,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {h}
+                <th style={th(accent)}>When</th>
+                {fieldOrder.map((f) => (
+                  <th key={f.key} style={th(accent)}>
+                    {f.label}
                   </th>
                 ))}
               </tr>
@@ -57,12 +49,11 @@ export default async function BotLeadsPage({ params }: { params: { botId: string
                   <td style={cell} title={lead.createdAt}>
                     {lead.createdAt.slice(0, 16).replace("T", " ")}
                   </td>
-                  <td style={cell}>{lead.name}</td>
-                  <td style={cell}>{lead.phone}</td>
-                  <td style={cell}>{lead.partySize}</td>
-                  <td style={cell}>{lead.eventDate}</td>
-                  <td style={cell}>{lead.eventType || "—"}</td>
-                  <td style={{ ...cell, maxWidth: 260 }}>{lead.notes || "—"}</td>
+                  {fieldOrder.map((f) => (
+                    <td key={f.key} style={{ ...cell, maxWidth: 260 }}>
+                      {lead.fields[f.key] || "—"}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
@@ -74,13 +65,13 @@ export default async function BotLeadsPage({ params }: { params: { botId: string
         Recent conversations ({conversations.length})
       </h2>
       {conversations.length === 0 ? (
-        <p style={{ color: "#8a7a68" }}>No conversations logged yet.</p>
+        <p style={{ color: "#767685" }}>No conversations logged yet.</p>
       ) : (
         conversations.map((convo) => (
           <details
             key={convo.sessionId}
             style={{
-              border: "1px solid #eee3d0",
+              border: "1px solid #ece9f5",
               borderRadius: 8,
               padding: "10px 14px",
               marginBottom: 10,
@@ -94,7 +85,7 @@ export default async function BotLeadsPage({ params }: { params: { botId: string
             <div style={{ marginTop: 12 }}>
               {convo.turns.map((turn, i) => (
                 <p key={i} style={{ fontSize: 13.5, lineHeight: 1.6, margin: "6px 0" }}>
-                  <strong style={{ color: turn.role === "user" ? "#2d2118" : accent }}>
+                  <strong style={{ color: turn.role === "user" ? "#1c1c24" : accent }}>
                     {turn.role === "user" ? "Visitor" : bot.config.branding.botName}:
                   </strong>{" "}
                   {turn.content}
@@ -110,6 +101,15 @@ export default async function BotLeadsPage({ params }: { params: { botId: string
 
 const cell: React.CSSProperties = {
   padding: "8px 10px",
-  borderBottom: "1px solid #eee3d0",
+  borderBottom: "1px solid #ece9f5",
   verticalAlign: "top",
 };
+
+function th(accent: string): React.CSSProperties {
+  return {
+    textAlign: "left",
+    padding: "8px 10px",
+    borderBottom: `2px solid ${accent}`,
+    whiteSpace: "nowrap",
+  };
+}
