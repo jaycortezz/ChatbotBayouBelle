@@ -79,8 +79,12 @@ Locally, everything is stored in `.data/` as JSON files — no database needed.
 
 ## Deploy to Vercel
 
-1. Push this repo to GitHub and **Import** it at [vercel.com/new](https://vercel.com/new)
-   (auto-detected as Next.js, no build settings).
+**One-click import:**
+[Import this repo into Vercel](https://vercel.com/new/import?s=https%3A%2F%2Fgithub.com%2Fjaycortezz%2FChatbotBayouBelle)
+(log in with GitHub; the framework is auto-detected as Next.js, no build
+settings needed).
+
+1. Or manually: **Import** the repo at [vercel.com/new](https://vercel.com/new).
 2. Add environment variables:
 
    | Variable | Required | Notes |
